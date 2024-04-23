@@ -1,0 +1,43 @@
+-- SQL 문장의 주석
+-- 마지막에 세미콜론으로 끝낸다
+-- 키워드, Table, 컬럼 등 대소문자 구분 X
+-- 실제 데이터의 경우 대소문자를 구분
+
+-- 테이블 구조 확인 (DESCRIBE)
+DESCRIBE employees;
+describe EMPLOYEES;
+
+DESCRIBE departments;
+DESCRIBE Locations;
+
+-- DML(Data Manipulation Language)
+-- SELECT
+SELECT *
+FROM EMPLOYEES;
+
+-- 특정 컬럼만 Projection하고자 하면 열 목록을 명시
+
+-- employees 테이블의 first_name, phone_number,hire_date,salary
+
+SELECT first_name, phone_number, hire_date,salary
+FROM EMPLOYEES; -- 대소문자 구분 X
+
+-- 사원의 이름, 성, 급여, 전화번호, 입사일 정보 
+SELECT FIRST_NAME, LAST_NAME, SALARY, PHONE_NUMBER, HIRE_DATE
+FROM EMPLOYEES;
+
+-- 사원에서 사번, 이름, 성 정보 출력
+SELECT EMPLOYEE_ID, FIRST_NAME, LAST_NAME
+FROM EMPLOYEES;
+
+-- 산술연산 : 기본적인 산술연산을 수행할 수 있다.
+-- 특정 테이블의 값이 아닌 시스템으로부터 데이터를 받아오고자 할 때 : dual (가상테이블)
+SELECT 3.14159 * 10 * 10
+FROM DUAL;
+
+-- 특정 컬럼의 값을 산술 연산에 포함
+SELECT FIRST_NAME, SALARY, SALARY*12
+FROM EMPLOYEES;
+
+SELECT JOB_ID
+FROM EMPLOYEES;

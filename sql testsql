@@ -39,5 +39,105 @@ FROM DUAL;
 SELECT FIRST_NAME, SALARY, SALARY*12
 FROM EMPLOYEES;
 
-SELECT JOB_ID
+-- NULL
+-- 이름, 급여를 출력
+SELECT FIRST_NAME, SALARY, COMMISSION_PCT
 FROM EMPLOYEES;
+
+-- 이름,커미션까지 포함한 급여
+SELECT FIRST_NAME,SALARY,COMMISSION_PCT, 
+       SALARY+SALARY* COMMISSION_PCT
+FROM EMPLOYEES; --NULL이 포함된 연산식은 NULL
+                --NULL처리 함수 NVL 필요
+
+-- NVL활용 대체값 0 계산
+SELECT FIRST_NAME,SALARY,COMMISSION_PCT,
+       SALARY+SALARY*NVL(COMMISSION_PCT,0)
+FROM EMPLOYEES;
+
+-- Alias / 별칭
+-- Projection 단계에서 출력용으로 표시되는 임시 컬럼 제목
+
+-- 직원아이디, 이름, 급여 출력
+-- 직원아이디는 empno, 이름은 f-name, 급여는 월급으로 출력
+SELECT EMPLOYEE_ID AS empno, FIRST_NAME AS "f-name", SALARY AS "월급"
+FROM EMPLOYEES;
+
+-- 직원 이름(first_name과 last_name 합쳐서) name으로 출력
+-- 급여(커미션이 포함된 급여),급여*12를 연봉 으로 출력
+SELECT FIRST_NAME ||' '|| LAST_NAME AS NAME, SALARY+SALARY*NVL(COMMISSION_PCT,0) AS "급여",
+       SALARY*12 AS "연봉"
+FROM EMPLOYEES;
+
+
+SELECT FIRST_NAME || ' '|| LAST_NAME 이름, HIRE_DATE 입사일, PHONE_NUMBER 전화번호,
+       SALARY 급여, SALARY*12 연봉
+FROM EMPLOYEES;
+
+------------
+--WHERE
+------------
+
+-- WHERE절 연습문제
+SELECT FIRST_NAME || ' '|| LAST_NAME 이름, SALARY 급여
+FROM EMPLOYEES
+WHERE SALARY >=15000;
+
+-- 입사일이 07/01/01 이후의 직원들의 이름과 입사일
+SELECT FIRST_NAME, HIRE_DATE
+FROM EMPLOYEES
+WHERE HIRE_DATE > '17/01/01';
+
+-- 급여가 4000 이하이거나 17000 이상인 사원의 이름과 급여
+SELECT FIRST_NAME, SALARY
+FROM EMPLOYEES
+WHERE SALARY <=4000 OR SALARY>=17000
+ORDER BY SALARY ASC;
+
+-- 급여가 14000이상이고, 17000미만인 사원의 이름과 급여
+SELECT FIRST_NAME|| ' ' ||LAST_NAME NAME, SALARY
+FROM EMPLOYEES
+WHERE SALARY BETWEEN 14000 AND 17000;
+
+-- NULL 체크할때 = , <> 사용하면 안됨
+-- IS NULL, IS NOT NULL
+
+-- 커미션을 받지 않는 사람들이 null인 레코드
+SELECT FIRST_NAME, COMMISSION_PCT
+FROM EMPLOYEES
+WHERE COMMISSION_PCT IS NULL;
+
+-- 커미션을 받느느사람들이 널이 아닌 레코드
+SELECT FIRST_NAME, COMMISSION_PCT
+FROM EMPLOYEES
+WHERE COMMISSION_PCT IS NOT NULL;
+
+-- IN 연산자: 특정 집합의 요소와 비교
+-- 사원들 중 10,20,40번 부서에서 근무하는 직원들의 이름과 부서 아이디
+SELECT FIRST_NAME, DEPARTMENT_ID
+FROM EMPLOYEES
+WHERE DEPARTMENT_ID IN (10,20,40);
+
+------------
+-- Like 연산
+------------
+
+-- 이름에 am을 포함하고 있는 사원의 이름과 급여
+SELECT FIRST_NAME, SALARY
+FROM EMPLOYEES
+WHERE LOWER(FIRST_NAME) LIKE '%am%';
+
+-- 이름의 두 번째 글자가 a인 사원의 이름과 급여
+SELECT FIRST_NAME, SALARY
+FROM EMPLOYEES
+WHERE LOWER(FIRST_NAME) LIKE '_a%';
+
+-- 이름의 네번재 글자가 a인 사원의 이름과 급여
+SELECT FIRST_NAME, SALARY
+FROM EMPLOYEES
+WHERE LOWER(FIRST_NAME) LIKE '___a%';
+
+-- 이름이 네글자인 사원들 중 두번째 글자가 a인 사원의 이름과 급여
+SELECT FIRST_NAME, SALARY
+FROM EMPLOYEES
+WHERE LOWER(FIRST_NAME) LIKE '_a__'; 

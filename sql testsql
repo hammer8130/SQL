@@ -173,5 +173,131 @@ WHERE SALARY >=10000
 ORDER BY SALARY DESC;
 
 
+------------
+-- 단일행 함수
+------------
+
+-- 문자열 단일행
+SELECT FIRST_NAME, LAST_NAME,
+    CONCAT(FIRST_NAME, CONCAT(' ', LAST_NAME)) NAME, -- 문자열 연결함수
+    INITCAP(FIRST_NAME||' '|| LAST_NAME)
+FROM EMPLOYEES;
+
+SELECT FIRST_NAME, LAST_NAME,
+    LOWER(FIRST_NAME),
+    UPPER(FIRST_NAME),
+    LPAD(FIRST_NAME, 20, '*'), -- 왼쪽 빈 자리
+    RPAD(FIRST_NAME, 20, '*')  -- 오른쪽 빈 자리
+FROM EMPLOYEES;
+
+SELECT '    Oracle     '    , '*****Database*****',
+    LTRIM('    Oracle     '),
+    RTRIM('    Oracle     '),
+    TRIM('*' FROM '*****Database*****'),
+    SUBSTR('Oracle Database',8,4),
+    SUBSTR('Oracle Database',-8,4),
+    LENGTH('Oracle Database')
+FROM DUAL;
+
+-- 수치형 단일행 함수
+
+SELECT 3.14159,
+    ABS(-3.14) 절대값,
+    CEIL(3.14) 올림,
+    FLOOR(3.14) 내림,
+    ROUND(3.5) 반올림,
+    ROUND(3.14159, 3) 반올림소수점,
+    TRUNC(3.5) 버림,
+    TRUNC(3.14159,3) 버림소수점,
+    SIGN(-3.14159) 부호, -- 음수: -1 / 0: 0 / 양수: 1
+    MOD(7,3) 나머지,
+    POWER(2,4) 제곱 -- 2의 4제곱
+FROM DUAL;
+
+------------
+-- Date Format
+------------
+
+-- 현재 세션 정보 확인
+SELECT *
+FROM NLS_SESSION_PARAMETERS;
+-- 현재 날짜 포맷이 어떻게 되는가
+-- 딕셔너리를 확인
+SELECT VALUE
+FROM NLS_SESSION_PARAMETERS -- 현재 접속된 사용자의 환경정보를 session이라 부른다.
+WHERE PARAMETER='NLS_DATE_FORMAT';
+
+-- 현재 날짜 : SYSDATE
+SELECT SYSDATE
+FROM DUAL; -- 다른 Table 조회시 레코드의 갯수만큼 SYSDATE가 출력된다.
+
+-- 날짜 관련 단일행 함수
+SELECT SYSDATE,
+    ADD_MONTHS(SYSDATE,2),  -- 2개월 지난 후의 날짜
+    LAST_DAY(SYSDATE),       -- 현재 달의 마지막 날
+    MONTHS_BETWEEN('12/09/24',SYSDATE),  -- 두 날짜 사이의 개월 차
+    NEXT_DAY(SYSDATE,7),  -- 인덱스 1부터 일요일 시작
+    NEXT_DAY(SYSDATE,'월'),
+    ROUND(SYSDATE,'MONTH'),   -- MONTH를 기준으로 반올림
+    TRUNC(SYSDATE,'MONTH')   -- MONTH를 기준으로 버림
+FROM DUAL;
+
+SELECT FIRST_NAME, HIRE_DATE, 
+   ROUND(MONTHS_BETWEEN(SYSDATE,HIRE_DATE)) 근속함수
+FROM EMPLOYEES;
+
+------------
+-- 변환함수
+------------
+
+SELECT FIRST_NAME,
+   TO_CHAR(HIRE_DATE, 'YYYY-MM-DD')
+FROM EMPLOYEES;
+
+-- 현재 시간을 년-월-일 시:분:초
+SELECT SYSDATE,
+    TO_CHAR(SYSDATE,'YYYY-MM-DD HH:mm:ss')
+FROM DUAL;
+
+SELECT
+    TO_CHAR(3000000, 'L999,999,999.99')
+FROM DUAL;
+
+-- 모든 직원의 이름과 연봉 정보를 표시
+SELECT FIRST_NAME,SALARY, COMMISSION_PCT,
+    TO_CHAR((SALARY+SALARY*NVL(COMMISSION_PCT,0))*12,'$999,999.99') 연봉
+FROM EMPLOYEES;
+
+
+-- 문자를 숫자로
+SELECT '$57,600',
+    TO_NUMBER('$57,600','$999,999') / 12 월급
+FROM DUAL;
+
+-- 문자를 날짜로
+SELECT '2012-09-24 13:48:00'
+    TO_DATE('2012-09-24 13:48:00', 'YYYY-MM-DD HH:mm:ss')
+FROM DUAL;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

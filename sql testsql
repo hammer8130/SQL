@@ -275,12 +275,60 @@ SELECT '$57,600',
 FROM DUAL;
 
 -- 문자를 날짜로
-SELECT '2012-09-24 13:48:00'
-    TO_DATE('2012-09-24 13:48:00', 'YYYY-MM-DD HH:mm:ss')
+SELECT '2012-09-24 13:48:00',
+    TO_DATE('2012-09-24 13:48:00', 'YYYY-MM-DD HH24:MI:SS')
+FROM DUAL;
+
+-- 날짜 연산
+-- DATE에서 특정 날수를 더하거나 뺼 수 있다.
+-- DATE - DATE
+SELECT SYSDATE, SYSDATE+1, SYSDATE -1,
+    SYSDATE - TO_DATE('20120924'),
+    SYSDATE +48 /24  -- 40시간이 지난 후의 날짜
 FROM DUAL;
 
 
+-- NUL 함수
+SELECT FIRST_NAME,
+    SALARY,
+    NVL(SALARY * COMMISSION_PCT,0)
+FROM EMPLOYEES;
 
+-- NV12 함수
+SELECT FIRST_NAME,
+    SALARY,
+    NVL2(COMMISSION_PCT,SALARY * COMMISSION_PCT,0)
+FROM EMPLOYEES;                                                                                                                    
+
+-- CASE 합수 보너스 지급,
+-- AD관련 직종에겐 20%, SA관련 직원은 10%, IT관련 직원들 8%, 나머지 5%
+SELECT FIRST_NAME,JOB_ID,SALARY
+    ,SUBSTR(JOB_ID,1,2),
+    CASE SUBSTR(JOB_ID,1,2) WHEN 'AD' THEN SALARY * 0.2
+                            WHEN 'SA' THEN SALARY * 0.1
+                            WHEN 'IT' THEN SALARY * 0.08
+                            ELSE SALARY * 0.05 
+    END BOUNS
+FROM EMPLOYEES;                                                            
+
+-- DECODE 함수
+SELECT FIRST_NAME, JOB_ID, SALARY,
+    SUBSTR(JOB_ID,1,2),
+    DECODE(SUBSTR(1,2), 
+            'AD', SALARY * 0.2,
+            'SA', SALARY * 0.1,
+            'IT', SALARY * 0.05,
+            SALARY * 0.05) BONUS
+FROM EMPLOYEES;
+
+--연습문제
+SELECT FIRST_NAME,DEPARTMENT_ID,
+    CASE WHEN DEPARTMENT_ID>=10 AND DEPARTMENT_ID<30 THEN 'A-Group'                       
+        WHEN DEPARTMENT_ID>=40 AND DEPARTMENT_ID<50 THEN 'B-Group'
+        WHEN DEPARTMENT_ID>=60 AND DEPARTMENT_ID<100 THEN 'C-Group'
+        ELSE 'REMAINDER'
+    END TEAM
+FROM EMPLOYEES;
 
 
 

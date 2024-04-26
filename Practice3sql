@@ -1,0 +1,63 @@
+-- 문제 1
+SELECT e.EMPLOYEE_ID, e.FIRST_NAME, e.LAST_NAME, d.DEPARTMENT_NAME
+FROM EMPLOYEES e JOIN DEPARTMENTS d
+ON e.DEPARTMENT_ID = d.DEPARTMENT_ID
+ORDER BY d.DEPARTMENT_NAME, e.EMPLOYEE_ID DESC;
+
+-- 문제 2
+SELECT e.EMPLOYEE_ID, e.FIRST_NAME, e.SALARY,d.DEPARTMENT_NAME,j.job_title
+FROM EMPLOYEES e JOIN DEPARTMENTS d
+ON e.DEPARTMENT_ID = d.DEPARTMENT_ID JOIN JOBS j
+ON e.JOB_ID = j.JOB_ID
+ORDER BY e.EMPLOYEE_ID;
+
+-- 문제 2-1
+SELECT e.EMPLOYEE_ID, e.FIRST_NAME, e.SALARY,d.DEPARTMENT_NAME,j.job_title
+FROM EMPLOYEES e LEFT OUTER JOIN DEPARTMENTS d
+ON e.DEPARTMENT_ID = d.DEPARTMENT_ID JOIN JOBS j
+ON e.JOB_ID = j.JOB_ID
+ORDER BY e.EMPLOYEE_ID;
+
+-- 문제 3
+SELECT l.location_id,  l.CITY, d.department_name, d.department_id
+FROM LOCATIONS l JOIN DEPARTMENTS d
+ON l.location_id = d.location_id;
+
+-- 문제 3-1
+SELECT l.location_id,  l.CITY, d.department_name, d.department_id
+FROM LOCATIONS l LEFT OUTER JOIN DEPARTMENTS d
+ON l.location_id = d.location_id;
+
+-- 문제 4
+SELECT r.REGION_NAME, c.country_name
+FROM REGIONS r JOIN COUNTRIES c
+ON r.REGION_ID = c.REGION_ID
+ORDER BY r.region_name, c.country_name DESC;
+
+-- 문제 5
+SELECT e.employee_id, e.first_name, e.hire_date, m.first_name MANAGER, m.hire_date
+FROM EMPLOYEES e JOIN EMPLOYEES m
+ON e.employee_id = m.manager_id
+WHERE e.hire_date>m.hire_date;
+
+-- 문제 6
+SELECT c.COUNTRY_NAME, c.COUNTRY_ID, l.CITY, l.LOCATION_ID, d.DEPARTMENT_NAME,d.DEPARTMENT_ID
+FROM COUNTRIES c JOIN LOCATIONS l
+ON c.COUNTRY_ID = l.COUNTRY_ID JOIN DEPARTMENTS d
+ON l.LOCATION_ID = d.LOCATION_ID
+ORDER BY c.COUNTRY_NAME;
+
+-- 문제 7
+
+
+
+
+
+
+
+
+
+
+
+
+

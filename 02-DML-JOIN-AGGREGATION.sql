@@ -104,7 +104,7 @@ ON e.DEPARTMENT_ID = d.DEPARTMENT_ID AND e.MANAGER_ID = d.MANAGER_ID;
 -----------
 
 SELECT e.EMPLOYEE_ID, e.FIRST_NAME, e.MANAGER_ID, d.FIRST_NAME MANAGERNAME
-FROM EMPLOYEES e LEFT OUTER JOIN EMPLOYEES d
+FROM EMPLOYEES e JOIN EMPLOYEES d
 ON e.MANAGER_ID = d.EMPLOYEE_ID;
 
 
@@ -112,6 +112,155 @@ ON e.MANAGER_ID = d.EMPLOYEE_ID;
 SELECT e.EMPLOYEE_ID, e.FIRST_NAME, e.MANAGER_ID, d.FIRST_NAME MANAGERNAME
 FROM EMPLOYEES e LEFT OUTER JOIN EMPLOYEES d
 ON e.MANAGER_ID = d.MANAGER_ID;
+
+-----------
+-- Group Aggregation
+-----------
+
+-- 집계: 여러 행으로부터 데이터를 수집, 하나의 행으로 반환
+
+-- COUNT()
+-- *로 카운트 시 모든 행의 수 반환
+SELECT COUNT(*)
+FROM EMPLOYEES;
+
+-- 특정 컬럼 내 NULL 값이 포함되어 있는지 여부
+
+-- 커미션을 받는 직원의 수
+-- 컬럼 내에 포함된 NULL 데이터를 카운트하지 않음
+SELECT COUNT(COMMISSION_PCT)
+FROM EMPLOYEES;
+-- 위와 같은 식
+SELECT COUNT(*)
+FROM EMPLOYEES
+WHERE COMMISSION_PCT IS NOT NULL;
+
+-- SUM()
+-- 모든 사원의 급여의 합계
+SELECT SUM(SALARY)
+FROM EMPLOYEES;
+
+-- AVG()
+-- 사원들의 평균 급여는 ?
+SELECT AVG(SALARY)
+FROM EMPLOYEES;
+
+-- 사원들이 받는 평균 커미션 비율?
+SELECT AVG(COMMISSION_PCT)
+FROM EMPLOYEES; --22%
+-- AVG함수는 NULL값이 포함되어 있을 경우 그 값을 집계 수치에서 제외
+-- NULL값을 집계 결과에 포함시킬지 여부는 정책으로 결정 및 수행
+SELECT AVG(NVL(COMMISSION_PCT,0))
+FROM EMPLOYEES; --7%
+
+-- MIN() / MAX()
+-- AVG() / MEDIAN()  산술평균, 중앙값
+SELECT MIN(SALARY) 최소급여, MAX(SALARY) 최대급여, AVG(SALARY) 평균급여,
+    MEDIAN(SALARY) 급여중앙값
+FROM EMPLOYEES;
+
+-- 흔히 범하는 오류
+-- 부서 별, 평균 급여 구하고자 할 때
+SELECT DEPARTMENT_ID, AVG(SALARY)
+FROM EMPLOYEES;
+
+SELECT DEPARTMENT_ID FROM EMPLOYEES; -- 여러 개의 레코드
+SELECT AVG(SALARY) FROM EMPLOYEES; -- 단일 레코드, 따라서 위 쿼리는 잘못된 쿼리
+
+SELECT DEPARTMENT_ID,SALARY
+FROM EMPLOYEES
+ORDER BY DEPARTMENT_ID;
+
+-- 1. GROUPING 2. 집계
+-- GROUP BY
+SELECT DEPARTMENT_ID,ROUND(AVG(SALARY),2) 평균
+FROM EMPLOYEES
+GROUP BY DEPARTMENT_ID -- 집계를 위해 특정 컬럼을 기준으로 그룹핑 우선
+ORDER BY DEPARTMENT_ID;
+
+-- 부서별 평균 급여에 부서명도 포함하여 출력
+SELECT e.DEPARTMENT_ID, d.DEPARTMENT_NAME, ROUND(AVG(SALARY),2)
+FROM EMPLOYEES e JOIN DEPARTMENTS d
+ON e.DEPARTMENT_ID = d.DEPARTMENT_ID
+GROUP BY e.DEPARTMENT_ID, d.DEPARTMENT_NAME
+ORDER BY e.DEPARTMENT_ID;
+-- GROUP BY 절 이후에는 GROUP BY에 참여한 컬럼 / 집계함수만 남는다.
+
+
+-- 평균 급여가 7000 이상인 부서만 출력
+SELECT DEPARTMENT_ID, AVG(SALARY)
+FROM EMPLOYEES e
+WHERE AVG(SALARY) >= 7000  -- 아직 집계 함수 시행되지 않은 상태 => 집계함수 비교 불가
+GROUP BY DEPARTMENT_ID
+ORDER BY DEPARTMENT_ID;
+
+SELECT DEPARTMENT_ID, AVG(SALARY)
+FROM EMPLOYEES e
+GROUP BY DEPARTMENT_ID
+    HAVING AVG(SALARY) >=7000
+ORDER BY DEPARTMENT_ID;
+
+-- ROLLUP
+-- GROUP BY절과 하께 사용
+-- 그룹지어진 결과에 대한 좀 더 상세한 요약을 제공하는 기능수행
+-- 일종의 item total
+SELECT DEPARTMENT_ID, JOB_ID, SUM(SALARY)
+FROM EMPLOYEES
+GROUP BY ROLLUP(DEPARTMENT_ID, JOB_ID);
+
+-- CUBE
+-- CrossTab에 대한 summary를 함께 추출하는 함수
+-- Rollup 함수에 의해 출력되는 Item Total 값과 함께 출력된다.
+-- Column Total
+SELECT DEPARTMENT_ID, JOB_ID, SUM(SALARY)
+FROM EMPLOYEES
+GROUP BY CUBE(DEPARTMENT_ID, JOB_ID);
+
+
+-----------
+-- SUBQUERY
+-----------
+
+-- 모든 직원 급여의 중앙값보다 많은 급여를 받는 사원
+
+-- 1) 직원 급여의 중앙값?
+-- 2) 1번의 결과보다 많은 급여를 받는 직원의 목록
+
+-- 1) 직원 급여의 중앙값
+SELECT MEDIAN(SALARY)
+FROM EMPLOYEES;  --6200
+-- 2) 1번의 결과보다 많은 급여를 받는 직원의 목록
+SELECT FIRST_NAME, SALARY
+FROM EMPLOYEES
+WHERE SALARY >=6200;
+
+-- 1) ,2) 합치기
+SELECT FIRST_NAME, SALARY
+FROM EMPLOYEES
+WHERE SALARY >=( SELECT MEDIAN(SALARY)
+                    FROM EMPLOYEES)
+ORDER BY SALARY DESC;
+
+-- SUSAN보다 늦게 입사한 사원의 정보
+-- 1) Susan의 입사일
+-- 2) 1번의 결과보다 늦게 입사한 사원의 정보를 추출
+
+-- 1) Susan의 입사일
+SELECT HIRE_DATE FROM EMPLOYEES
+WHERE FIRST_NAME = 'Susan';  --12/06/07
+
+-- 2)1번의 결과보다 늦게 입사한 사원의 정보 추출
+SELECT FIRST_NAME,HIRE_DATE FROM EMPLOYEES
+WHERE HIRE_DATE < '12/06/07';
+
+-- 두 쿼리 합치기
+SELECT FIRST_NAME, HIRE_DATE
+FROM EMPLOYEES
+WHERE HIRE_DATE < (SELECT HIRE_DATE FROM EMPLOYEES
+                    WHERE FIRST_NAME = 'Susan')
+;
+                
+
 
 
 

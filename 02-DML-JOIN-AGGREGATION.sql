@@ -260,6 +260,153 @@ WHERE HIRE_DATE < (SELECT HIRE_DATE FROM EMPLOYEES
                     WHERE FIRST_NAME = 'Susan')
 ;
                 
+-- Practice
+-- 급여를 모든 직원 급여의 중앙값보다 많이 받으면서 수잔보다 늦게 입사한 직원의 목록
+SELECT FIRST_NAME,SALARY , HIRE_DATE
+FROM EMPLOYEES
+WHERE SALARY>= (SELECT MEDIAN(SALARY) FROM EMPLOYEES)
+AND HIRE_DATE > (SELECT HIRE_DATE FROM EMPLOYEES
+                WHERE FIRST_NAME = 'Susan')
+ORDER BY HIRE_DATE, SALARY DESC;
+
+
+-- 다중행 서브쿼리
+-- 서브쿼리 결과가 둘 이상의 레코드일때 단일행 비교연산자는 사용할 수 없다
+-- 집합 연산에 관련된 IN, ANY, EXISTS 등을 사용해야 한다
+
+-- 110번 부서 사람들이 받는 급여와 같은 급여를 받는 직원들의 목록
+SELECT FIRST_NAME, SALARY
+FROM EMPLOYEES
+WHERE SALARY IN (12008,8300);
+
+SELECT FIRST_NAME, SALARY
+FROM EMPLOYEES
+WHERE SALARY IN (SELECT SALARY
+                FROM EMPLOYEES
+                WHERE DEPARTMENT_ID = 110);
+
+-- 110번 부서 사람들이 받는 급여보다 많은 급여를 받는 직원들 목록
+SELECT FIRST_NAME, SALARY
+FROM EMPLOYEES
+WHERE SALARY > ALL(SELECT SALARY
+                    FROM EMPLOYEES
+                    WHERE DEPARTMENT_ID = 110); -- 12008과 8300 둘 보다 큰 값.
+
+-- 110번 부서 사람들이 받는 급여 중 하나보돠 많은 급여를 받는 직원들 목록
+SELECT FIRST_NAME, SALARY
+FROM EMPLOYEES
+WHERE SALARY > ANY(SELECT SALARY
+                    FROM EMPLOYEES
+                    WHERE DEPARTMENT_ID =110)  -- 12008, 8300
+ORDER BY SALARY DESC;
+
+
+-- Correlated Query : 연관 쿼리
+-- 바깥쪽 쿼리(Outer Query)와 안쪽 쿼리(Inner Query)가 서로 연관된 쿼리
+
+-- 외부 쿼리: 급여를 특정 값보다 많이 받는 직원의 이름, 급여, 부서 아이디
+-- 내부 쿼리: 특정 부서에 소속된 직원의 평균 급여
+SELECT FIRST_NAME, SALARY, DEPARTMENT_ID
+FROM EMPLOYEES outer
+WHERE SALARY > (SELECT AVG(SALARY)
+                FROM EMPLOYEES inner
+                WHERE DEPARTMENT_ID = outer.DEPARTMENT_ID);
+-- 자신이 속한 부서의 평균 급여보다 많이 받는 직원들의 목록
+
+
+-- 서브쿼리 연습
+-- 각 부서별로 최고 급여를 받는 사원의 목록 (조건절에서 서브쿼리 활용)
+-- 1. 각 부서별 최고 급여 출력
+ SELECT DEPARTMENT_ID, MAX(SALARY)
+ FROM EMPLOYEES
+ GROUP BY DEPARTMENT_ID;
+
+-- 2. 1번 쿼리에서 나온 값을 이용해서 외부 쿼리를 작성
+SELECT DEPARTMENT_ID, EMPLOYEE_ID, FIRST_NAME, SALARY
+FROM EMPLOYEES
+WHERE (DEPARTMENT_ID, SALARY) IN (SELECT DEPARTMENT_ID,MAX(SALARY)
+                                    FROM EMPLOYEES
+                                    GROUP BY DEPARTMENT_ID)
+ORDER BY DEPARTMENT_ID;
+
+-- 각 부서별로 최고 급여를 받는 사원의 목록 ( 서브쿼리 이용, 임시 테이블 생성
+--                                                     => 테이블 조인 결과 뽑기)
+-- 1. 각 부서의 최고 급여를 출력하는 쿼리
+SELECT DEPARTMENT_ID, MAX(SALARY)
+FROM EMPLOYEES
+GROUP BY DEPARTMENT_ID;
+
+-- result. 1번 쿼리에서 생성한 임시 테이블과 외부 쿼리를 조인
+SELECT e.DEPARTMENT_ID, e.EMPLOYEE_ID,e.FIRST_NAME, e.SALARY
+FROM EMPLOYEES e, (SELECT DEPARTMENT_ID, MAX(SALARY) salary -- alias가 다르면 밑에 AND절에서 인식을 하지 못하므로 주의한다.
+                    FROM EMPLOYEES
+                    GROUP BY DEPARTMENT_ID) sal   --e와 sal simple join
+WHERE e.DEPARTMENT_ID = sal.DEPARTMENT_ID
+AND e.SALARY = sal.SALARY
+ORDER BY DEPARTMENT_ID;
+
+-- Top-K Query
+-- 질의의 결과로 부여된 가상 컬럼 rownum 값을 사용하여 쿼리순서 반환
+-- rownum 값을 활용 상위 k개의 값을 얻어오는 쿼리
+
+-- 1. 2017년 입사자 중 연봉 순위 5위까지 출력
+SELECT *
+FROM EMPLOYEES
+WHERE HIRE_DATE LIKE '17%'
+ORDER BY SALARY DESC;
+
+-- 2. 1번 쿼리를 활용. rownum값까지 확인, rownum <=5 인 레코드 => 상위 5개의 레코드
+SELECT ROWNUM,FIRST_NAME, SALARY
+FROM (SELECT *
+    FROM EMPLOYEES
+    WHERE HIRE_DATE LIKE '17%'
+    ORDER BY SALARY DESC)
+WHERE ROWNUM <=5;
+
+
+-- 집합 연산
+
+SELECT FIRST_NAME, SALARY, HIRE_DATE
+FROM EMPLOYEES
+WHERE HIRE_DATE < '15/1/1'  --15년 이전 입사자
+MINUS -- UNION ALL / INTERSECT / MINUS
+SELECT FIRST_NAME, SALARY, HIRE_DATE
+FROM EMPLOYEES
+WHERE SALARY > 12000
+ORDER BY SALARY;
+
+SELECT FIRST_NAME, SALARY, HIRE_DATE
+FROM EMPLOYEES
+WHERE (SALARY, HIRE_DATE) IN (SELECT SALARY,HIRE_DATE
+                            FROM EMPLOYEES
+                            WHERE SALARY > 12000 AND HIRE_DATE<'15/1/1');
+
+-- RANK 관련 함수
+SELECT SALARY, FIRST_NAME,
+    RANK() OVER(ORDER BY SALARY DESC) RANK, -- 같은 순위가 있으면 다음건 건너 뛴다. 일반적인 순위
+    DENSE_RANK() OVER (ORDER BY SALARY DESC) DENSE_LINK, -- 같은 동일 순위가 있어도 다
+    ROW_NUMBER() OVER (ORDER BY SALARY DESC) ROW_NUMBER, -- 정렬 시 실제 rownum ( 행번호 ) 표기
+    ROWNUM
+FROM EMPLOYEES;
+
+
+-- Hierarchical Query ( Oracle 특화 )
+-- 트리 형태 구조 표현
+-- LEVEL 가상 컬럼 활용 쿼리
+SELECT LEVEL, FIRST_NAME
+FROM EMPLOYEES
+START WITH MANAGER_ID IS NULL  -- 트리 형태의 ROOT가 되는 조건 명시
+CONNECT BY EMPLOYEE_ID = m.MANAGER_ID
+
+
+
+
+
+
+
+
+
+
 
 
 

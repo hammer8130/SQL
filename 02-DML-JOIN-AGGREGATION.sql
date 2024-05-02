@@ -201,7 +201,7 @@ GROUP BY DEPARTMENT_ID
 ORDER BY DEPARTMENT_ID;
 
 -- ROLLUP
--- GROUP BY절과 하께 사용
+-- GROUP BY절과 함께 사용
 -- 그룹지어진 결과에 대한 좀 더 상세한 요약을 제공하는 기능수행
 -- 일종의 item total
 SELECT DEPARTMENT_ID, JOB_ID, SUM(SALARY)

@@ -279,3 +279,14 @@ COMMIT;
 ROLLBACK;
 SELECT * FROM T_TEST;
 
+
+CREATE OR REPLACE VIEW emp_80
+AS SELECT employee_id, first_name, last_name, manager_id, salary
+FROM employees
+WHERE department_id = 80
+WITH READ ONLY;
+
+SELECT * FROM EMP_80;
+
+
+

@@ -126,6 +126,7 @@ DESC AUTHOR;
 
 
 
+
 -- BOOK 테이블의 AUTHOR 컬럼 삭제
 -- 나중에 AUTHOR_ID 컬럼 추가 -> AUTHOR,AUTHOR_ID와 참조 연결할 예정
 DESC BOOK;
@@ -287,6 +288,9 @@ WHERE department_id = 80
 WITH READ ONLY;
 
 SELECT * FROM EMP_80;
+
+
+
 
 
 
